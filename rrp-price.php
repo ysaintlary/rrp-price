@@ -98,7 +98,12 @@ add_filter( 'woocommerce_product_export_product_column_rrp_price', function ( $v
 /* ─── CSV Import : mapper la colonne RRP ─── */
 
 add_filter( 'woocommerce_csv_product_import_mapping_options', function ( array $options ): array {
-	$options['rrp_price'] = __( 'RRP', 'rrp-price' );
+	$price_group = __( 'Price', 'woocommerce' );
+	if ( isset( $options[ $price_group ] ) && is_array( $options[ $price_group ] ) ) {
+		$options[ $price_group ]['rrp_price'] = __( 'RRP', 'rrp-price' );
+	} else {
+		$options['rrp_price'] = __( 'RRP', 'rrp-price' );
+	}
 	return $options;
 } );
 
