@@ -4,7 +4,7 @@ Tags: woocommerce, rrp, price, recommended retail price, csv
 Requires at least: 6.5
 Tested up to: 6.8
 Requires PHP: 8.0
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPL-3.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -30,6 +30,10 @@ YS RRP Price adds a dedicated RRP (Recommended Retail Price) field to WooCommerc
 3. Edit any product — the RRP field appears in the General tab under Pricing
 
 == Changelog ==
+
+= 1.0.1 =
+* Fix - fix: show RRP field under Price group in CSV import mapping.
+
 
 = 1.0.0 =
 * Initial release
