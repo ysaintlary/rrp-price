@@ -1,7 +1,7 @@
 <?php
 /**
- * Plugin Name:       SLS | RRP Price
- * Plugin URI:        https://github.com/ysaintlary/sls-rrp-price
+ * Plugin Name:       YS | RRP Price
+ * Plugin URI:        https://github.com/ysaintlary/rrp-price
  * Description:       Ajoute un champ « RRP » (prix de vente conseillé) aux fiches produits WooCommerce, avec import/export CSV.
  * Version:           1.0.0
  * Requires at least: 6.5
@@ -10,7 +10,7 @@
  * Author URI:        https://ysaintlary.com
  * License:           GPL-3.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-3.0.html
- * Text Domain:       sls-rrp-price
+ * Text Domain:       rrp-price
  * Domain Path:       /languages
  *
  * WC requires at least: 8.0
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SLS_RRP_VERSION', '1.0.0' );
+define( 'YS_RRP_VERSION', '1.0.0' );
 
 require_once __DIR__ . '/lib/wp-plugin-base/wp-plugin-base-runtime-updater.php';
 
@@ -39,8 +39,8 @@ add_action( 'before_woocommerce_init', function () {
 add_action( 'woocommerce_product_options_pricing', function () {
 	woocommerce_wp_text_input( [
 		'id'                => '_rrp_price',
-		'label'             => __( 'RRP', 'sls-rrp-price' ) . ' (' . get_woocommerce_currency_symbol() . ')',
-		'description'       => __( 'Prix de vente conseillé (Recommended Retail Price)', 'sls-rrp-price' ),
+		'label'             => __( 'RRP', 'rrp-price' ) . ' (' . get_woocommerce_currency_symbol() . ')',
+		'description'       => __( 'Prix de vente conseillé (Recommended Retail Price)', 'rrp-price' ),
 		'desc_tip'          => true,
 		'type'              => 'text',
 		'data_type'         => 'price',
@@ -64,10 +64,10 @@ add_filter( 'woocommerce_get_price_html', function ( $price_html, $product ) {
 	$rrp = $product->get_meta( '_rrp_price' );
 	if ( '' !== $rrp && false !== $rrp ) {
 		$rrp_formatted = wc_price( $rrp );
-		$price_html   .= '<p class="sls-rrp-price"><small>'
+		$price_html   .= '<p class="rrp-price"><small>'
 			. sprintf(
 				/* translators: %s: formatted RRP price */
-				__( 'RRP : %s', 'sls-rrp-price' ),
+				__( 'RRP : %s', 'rrp-price' ),
 				$rrp_formatted
 			)
 			. '</small></p>';
@@ -77,8 +77,8 @@ add_filter( 'woocommerce_get_price_html', function ( $price_html, $product ) {
 
 /* ─── CSV Export : colonne RRP ─── */
 
-add_filter( 'woocommerce_product_export_column_names', 'sls_rrp_export_column' );
-add_filter( 'woocommerce_product_export_product_default_columns', 'sls_rrp_export_column' );
+add_filter( 'woocommerce_product_export_column_names', 'ys_rrp_export_column' );
+add_filter( 'woocommerce_product_export_product_default_columns', 'ys_rrp_export_column' );
 
 /**
  * Register the RRP column for CSV export.
@@ -86,8 +86,8 @@ add_filter( 'woocommerce_product_export_product_default_columns', 'sls_rrp_expor
  * @param array<string,string> $columns Export columns.
  * @return array<string,string>
  */
-function sls_rrp_export_column( array $columns ): array {
-	$columns['rrp_price'] = __( 'RRP', 'sls-rrp-price' );
+function ys_rrp_export_column( array $columns ): array {
+	$columns['rrp_price'] = __( 'RRP', 'rrp-price' );
 	return $columns;
 }
 
@@ -98,12 +98,12 @@ add_filter( 'woocommerce_product_export_product_column_rrp_price', function ( $v
 /* ─── CSV Import : mapper la colonne RRP ─── */
 
 add_filter( 'woocommerce_csv_product_import_mapping_options', function ( array $options ): array {
-	$options['rrp_price'] = __( 'RRP', 'sls-rrp-price' );
+	$options['rrp_price'] = __( 'RRP', 'rrp-price' );
 	return $options;
 } );
 
 add_filter( 'woocommerce_csv_product_import_mapping_default_columns', function ( array $columns ): array {
-	$columns[ __( 'RRP', 'sls-rrp-price' ) ] = 'rrp_price';
+	$columns[ __( 'RRP', 'rrp-price' ) ] = 'rrp_price';
 	$columns['RRP'] = 'rrp_price';
 	return $columns;
 } );

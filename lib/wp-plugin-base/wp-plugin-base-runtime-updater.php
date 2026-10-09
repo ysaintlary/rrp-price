@@ -19,7 +19,7 @@ $wp_plugin_base_runtime_updater_should_bootstrap = (
 
 if ( function_exists( 'apply_filters' ) ) {
 	$wp_plugin_base_runtime_updater_should_bootstrap = (bool) apply_filters(
-		'sls-rrp-price_runtime_updater_should_bootstrap',
+		'rrp-price_runtime_updater_should_bootstrap',
 		$wp_plugin_base_runtime_updater_should_bootstrap
 	);
 }
@@ -39,10 +39,10 @@ if ( ! class_exists( '\\YahnisElsts\\PluginUpdateChecker\\v5\\PucFactory' ) ) {
 	return;
 }
 
-$wp_plugin_base_runtime_updater_main_file  = dirname( dirname( __DIR__ ) ) . '/sls-rrp-price.php';
-$wp_plugin_base_runtime_updater_source_url = 'https://github.com/ysaintlary/sls-rrp-price';
+$wp_plugin_base_runtime_updater_main_file  = dirname( dirname( __DIR__ ) ) . '/rrp-price.php';
+$wp_plugin_base_runtime_updater_source_url = 'https://github.com/ysaintlary/rrp-price';
 $wp_plugin_base_runtime_updater_provider   = 'github-release';
-$wp_plugin_base_runtime_updater_slug       = 'sls-rrp-price';
+$wp_plugin_base_runtime_updater_slug       = 'rrp-price';
 
 if (
 	file_exists( $wp_plugin_base_runtime_updater_main_file )

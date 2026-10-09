@@ -1,4 +1,4 @@
-=== SLS | RRP Price ===
+=== YS | RRP Price ===
 Contributors: ysaintlary
 Tags: woocommerce, rrp, price, recommended retail price, csv
 Requires at least: 6.5
@@ -12,7 +12,7 @@ Adds a « RRP » (Recommended Retail Price) field to WooCommerce products, with 
 
 == Description ==
 
-SLS RRP Price adds a dedicated RRP (Recommended Retail Price) field to WooCommerce product pages.
+YS RRP Price adds a dedicated RRP (Recommended Retail Price) field to WooCommerce product pages.
 
 = Features =
 
@@ -25,7 +25,7 @@ SLS RRP Price adds a dedicated RRP (Recommended Retail Price) field to WooCommer
 
 == Installation ==
 
-1. Upload the `sls-rrp-price` folder to `/wp-content/plugins/`
+1. Upload the `rrp-price` folder to `/wp-content/plugins/`
 2. Activate the plugin through the "Plugins" menu in WordPress
 3. Edit any product — the RRP field appears in the General tab under Pricing
 
