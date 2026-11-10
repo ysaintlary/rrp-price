@@ -1,0 +1,10 @@
+# Child-owned PHPStan overlay loaded after phpstan.neon.dist.
+
+parameters:
+  excludePaths:
+    - lib
+
+  ignoreErrors:
+    -
+      identifier: function.notFound
+      message: '#wc_format_decimal|wc_price#'
