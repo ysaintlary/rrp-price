@@ -28,52 +28,73 @@ require_once __DIR__ . '/lib/wp-plugin-base/wp-plugin-base-runtime-updater.php';
 
 /* ─── Compatibilité HPOS ─── */
 
-add_action( 'before_woocommerce_init', function () {
-	if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
-		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__ );
+add_action(
+	'before_woocommerce_init',
+	function () {
+		if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__ );
+		}
 	}
-} );
+);
 
 /* ─── Back-office : champ RRP dans l'onglet Général ─── */
 
-add_action( 'woocommerce_product_options_pricing', function () {
-	woocommerce_wp_text_input( [
-		'id'                => '_rrp_price',
-		'label'             => __( 'RRP', 'rrp-price' ) . ' (' . get_woocommerce_currency_symbol() . ')',
-		'description'       => __( 'Prix de vente conseillé (Recommended Retail Price)', 'rrp-price' ),
-		'desc_tip'          => true,
-		'type'              => 'text',
-		'data_type'         => 'price',
-		'custom_attributes' => [ 'step' => 'any', 'min' => '0' ],
-	] );
-} );
-
-add_action( 'woocommerce_process_product_meta', function ( $post_id ) {
-	if ( isset( $_POST['_rrp_price'] ) ) {
-		update_post_meta(
-			$post_id,
-			'_rrp_price',
-			wc_format_decimal( sanitize_text_field( wp_unslash( $_POST['_rrp_price'] ) ) )
+add_action(
+	'woocommerce_product_options_pricing',
+	function () {
+		woocommerce_wp_text_input(
+			array(
+				'id'                => '_rrp_price',
+				'label'             => __( 'RRP', 'rrp-price' ) . ' (' . get_woocommerce_currency_symbol() . ')',
+				'description'       => __( 'Prix de vente conseillé (Recommended Retail Price)', 'rrp-price' ),
+				'desc_tip'          => true,
+				'type'              => 'text',
+				'data_type'         => 'price',
+				'custom_attributes' => array(
+					'step' => 'any',
+					'min'  => '0',
+				),
+			)
 		);
 	}
-} );
+);
+
+add_action(
+	'woocommerce_process_product_meta',
+	function ( $post_id ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified by WooCommerce.
+		if ( isset( $_POST['_rrp_price'] ) ) {
+			update_post_meta(
+				$post_id,
+				'_rrp_price',
+				// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified by WooCommerce.
+				wc_format_decimal( sanitize_text_field( wp_unslash( $_POST['_rrp_price'] ) ) )
+			);
+		}
+	}
+);
 
 /* ─── Front-end : affiche le RRP sous le prix ─── */
 
-add_filter( 'woocommerce_get_price_html', function ( $price_html, $product ) {
-	$rrp = $product->get_meta( '_rrp_price' );
-	if ( '' !== $rrp && false !== $rrp ) {
-		$rrp_formatted = wc_price( $rrp );
-		$price_html   .= '<p class="rrp-price"><small>'
-			. sprintf(
-				/* translators: %s: formatted RRP price */
-				__( 'RRP : %s', 'rrp-price' ),
-				$rrp_formatted
-			)
-			. '</small></p>';
-	}
-	return $price_html;
-}, 10, 2 );
+add_filter(
+	'woocommerce_get_price_html',
+	function ( $price_html, $product ) {
+		$rrp = $product->get_meta( '_rrp_price' );
+		if ( '' !== $rrp && false !== $rrp ) {
+			$rrp_formatted = wc_price( $rrp );
+			$price_html   .= '<p class="rrp-price"><small>'
+				. sprintf(
+					/* translators: %s: formatted RRP price */
+					__( 'RRP : %s', 'rrp-price' ),
+					$rrp_formatted
+				)
+				. '</small></p>';
+		}
+		return $price_html;
+	},
+	10,
+	2
+);
 
 /* ─── CSV Export : colonne RRP ─── */
 
@@ -91,35 +112,49 @@ function ys_rrp_export_column( array $columns ): array {
 	return $columns;
 }
 
-add_filter( 'woocommerce_product_export_product_column_rrp_price', function ( $value, $product ) {
-	return $product->get_meta( '_rrp_price' );
-}, 10, 2 );
+add_filter(
+	'woocommerce_product_export_product_column_rrp_price',
+	function ( $value, $product ) {
+		return $product->get_meta( '_rrp_price' );
+	},
+	10,
+	2
+);
 
 /* ─── CSV Import : mapper la colonne RRP ─── */
 
-add_filter( 'woocommerce_csv_product_import_mapping_options', function ( array $options ): array {
-	$price_group = __( 'Price', 'woocommerce' );
-	if ( isset( $options[ $price_group ] ) && is_array( $options[ $price_group ] ) ) {
-		$options[ $price_group ]['rrp_price'] = __( 'RRP', 'rrp-price' );
-	} else {
-		$options['rrp_price'] = __( 'RRP', 'rrp-price' );
+add_filter(
+	'woocommerce_csv_product_import_mapping_options',
+	function ( array $options ): array {
+		$price_group = __( 'Price', 'woocommerce' );
+		if ( isset( $options[ $price_group ] ) && is_array( $options[ $price_group ] ) ) {
+			$options[ $price_group ]['rrp_price'] = __( 'RRP', 'rrp-price' );
+		} else {
+			$options['rrp_price'] = __( 'RRP', 'rrp-price' );
+		}
+		return $options;
 	}
-	return $options;
-} );
+);
 
-add_filter( 'woocommerce_csv_product_import_mapping_default_columns', function ( array $columns ): array {
-	$columns[ __( 'RRP', 'rrp-price' ) ] = 'rrp_price';
-	$columns['RRP'] = 'rrp_price';
-	return $columns;
-} );
-
-add_filter( 'woocommerce_product_importer_parsed_data', function ( array $parsed_data ): array {
-	if ( isset( $parsed_data['rrp_price'] ) ) {
-		$parsed_data['meta_data'][] = [
-			'key'   => '_rrp_price',
-			'value' => wc_format_decimal( $parsed_data['rrp_price'] ),
-		];
-		unset( $parsed_data['rrp_price'] );
+add_filter(
+	'woocommerce_csv_product_import_mapping_default_columns',
+	function ( array $columns ): array {
+		$columns[ __( 'RRP', 'rrp-price' ) ] = 'rrp_price';
+		$columns['RRP']                       = 'rrp_price';
+		return $columns;
 	}
-	return $parsed_data;
-} );
+);
+
+add_filter(
+	'woocommerce_product_importer_parsed_data',
+	function ( array $parsed_data ): array {
+		if ( isset( $parsed_data['rrp_price'] ) ) {
+			$parsed_data['meta_data'][] = array(
+				'key'   => '_rrp_price',
+				'value' => wc_format_decimal( $parsed_data['rrp_price'] ),
+			);
+			unset( $parsed_data['rrp_price'] );
+		}
+		return $parsed_data;
+	}
+);
