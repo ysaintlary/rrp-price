@@ -3,7 +3,7 @@
  * Plugin Name:       YS | RRP Price
  * Plugin URI:        https://github.com/ysaintlary/rrp-price
  * Description:       Ajoute un champ « RRP » (prix de vente conseillé) aux fiches produits WooCommerce, avec import/export CSV.
- * Version: 1.0.5
+ * Version: 1.0.6
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Yves Saint-Lary
