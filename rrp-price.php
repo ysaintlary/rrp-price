@@ -140,7 +140,7 @@ add_filter(
 	'woocommerce_csv_product_import_mapping_default_columns',
 	function ( array $columns ): array {
 		$columns[ __( 'RRP', 'rrp-price' ) ] = 'rrp_price';
-		$columns['RRP']                       = 'rrp_price';
+		$columns['RRP']                      = 'rrp_price';
 		return $columns;
 	}
 );
