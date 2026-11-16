@@ -7,4 +7,4 @@ parameters:
   ignoreErrors:
     -
       identifier: function.notFound
-      message: '#wc_format_decimal|wc_price#'
+      message: '#wc_format_decimal|wc_price|woocommerce_wp_text_input|get_woocommerce_currency_symbol#'
