@@ -1,10 +1,20 @@
 version: 2
 updates:
+  # Version updates keep the SHA-pinned Actions current.
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 10
+      interval: monthly
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+    labels:
+      - dependencies
+      - github_actions
     commit-message:
       prefix: chore
       include: scope
@@ -32,6 +42,11 @@ updates:
       - dependency-name: "@types/react-dom"
         update-types:
           - version-update:semver-major
+    # Shared @wordpress/* packages are qualified together; keep them in one update.
+    groups:
+      wordpress-packages:
+        patterns:
+          - "@wordpress/*"
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
@@ -54,6 +69,11 @@ updates:
       - dependency-name: "@types/react-dom"
         update-types:
           - version-update:semver-major
+    # Shared @wordpress/* packages are qualified together; keep them in one update.
+    groups:
+      wordpress-packages:
+        patterns:
+          - "@wordpress/*"
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
@@ -76,10 +96,15 @@ updates:
       - dependency-name: "@types/react-dom"
         update-types:
           - version-update:semver-major
-      # typescript-eslint 8.70 supports TypeScript >=4.8.4 <6.1.0.
+      # typescript-eslint 8.72 supports TypeScript >=4.8.4 <6.1.0.
       - dependency-name: "typescript"
         update-types:
           - version-update:semver-major
+    # Shared @wordpress/* packages are qualified together; keep them in one update.
+    groups:
+      wordpress-packages:
+        patterns:
+          - "@wordpress/*"
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
