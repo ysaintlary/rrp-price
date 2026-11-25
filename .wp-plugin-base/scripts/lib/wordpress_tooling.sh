@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-WP_PLUGIN_BASE_COMPOSER_IMAGE='composer@sha256:9715c7f69044da2a212a5fbde29ee7da24e364d426560ae6367b060236f847d7'
+WP_PLUGIN_BASE_COMPOSER_IMAGE='composer@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0'
 WP_PLUGIN_BASE_PLUGIN_CHECK_VERSION='2.1.0'
 
 wp_plugin_base_wordpress_tools_dir() {
@@ -15,7 +15,7 @@ wp_plugin_base_wordpress_tools_dir() {
 # Callers provide a private, empty directory; no partially qualified tool is activated.
 wp_plugin_base_install_wordpress_env() (
   local destination_dir="$1"
-  local source_dir staging_dir
+  local source_dir
 
   source_dir="$(wp_plugin_base_wordpress_tools_dir)" || return 1
   if [ -L "$destination_dir" ] || [ ! -d "$destination_dir" ] || \
@@ -24,6 +24,7 @@ wp_plugin_base_install_wordpress_env() (
     return 1
   fi
   destination_dir="$(cd "$destination_dir" && pwd -P)" || return 1
+  # Not local: bash 3.2 can unwind function locals before a `bash -c` EXIT trap runs.
   staging_dir="$(mktemp -d "${destination_dir}.staging.XXXXXX")" || return 1
   trap 'rm -rf "$staging_dir"' EXIT
   trap 'exit 129' HUP
@@ -33,6 +34,9 @@ wp_plugin_base_install_wordpress_env() (
   (
     cd "$staging_dir" || return 1
     npm ci --no-audit --no-fund >/dev/null || return $?
+    # .npmrc disables npm's whole-tree engine-strict; enforce the engines of the
+    # packages the Docker runtime loads before the tool can be activated.
+    node "$source_dir/../../scripts/lib/check_wordpress_env_engines.cjs" "$staging_dir" "$(npm --version)" || return $?
     node "$source_dir/../../scripts/lib/patch_wordpress_env_git.cjs" "$staging_dir" || return $?
   ) || return $?
   node - "$staging_dir" "$destination_dir" <<'NODE'
@@ -52,11 +56,14 @@ wp_plugin_base_install_npm_audit() {
   local destination_dir="$1"
   local source_dir
 
+  # npm compares prefix paths with the physical project path on macOS.
+  destination_dir="$(cd "$destination_dir" && pwd -P)" || return 1
   source_dir="$(wp_plugin_base_wordpress_tools_dir)/../npm-audit" || return 1
-  cp "$source_dir/.npmrc" "$source_dir/package.json" "$source_dir/package-lock.json" "$destination_dir/" || return 1
+  cp "$source_dir/.npmrc" "$source_dir/package.json" "$source_dir/package-lock.json" "$source_dir/npm-remediations.json" "$destination_dir/" || return 1
   npm ci --prefix="$destination_dir" --ignore-scripts --bin-links=false --engine-strict \
     --include=dev --include=optional --include=peer --workspaces=false --global=false \
     --registry=https://registry.npmjs.org --no-audit --no-fund >/dev/null || return $?
+  node "$source_dir/../../scripts/security/npm-remediation.mjs" apply --project-root "$destination_dir" >/dev/null || return $?
 }
 
 wp_plugin_base_wordpress_env() {
@@ -125,4 +132,24 @@ wp_plugin_base_wordpress_env_start_with_retry() {
   rm -f "$start_log"
   echo "Failed to start wp-env after ${max_attempts} attempts." >&2
   return 1
+}
+
+# Foundation-owned tool locks (quality and security pack) change only with a
+# foundation release, so an advisory there must not block a project's CI or
+# release. Projects get a warning; foundation validation sets
+# WP_PLUGIN_BASE_FOUNDATION_TOOL_AUDIT=strict and blocks on the same findings.
+wp_plugin_base_audit_foundation_tool_lock() {
+  local context="$1"
+  shift
+
+  if wp_plugin_base_run_with_retry 3 5 "$context" "$@"; then
+    return 0
+  fi
+  if [ "${WP_PLUGIN_BASE_FOUNDATION_TOOL_AUDIT:-report}" = strict ]; then
+    return 1
+  fi
+  echo "Warning: ${context} did not pass for wp-plugin-base development tooling (advisories, or the audit could not run). Update wp-plugin-base to receive reviewed fixes; project validation continues." >&2
+  if [ "${GITHUB_ACTIONS:-}" = true ]; then
+    echo "::warning title=wp-plugin-base tooling audit::${context} did not pass for foundation-owned tooling; update wp-plugin-base."
+  fi
 }
